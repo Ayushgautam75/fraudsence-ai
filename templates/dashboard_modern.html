@@ -1,0 +1,894 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - FraudSense AI</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+      :root {
+        --bg: #f3f5fa;
+        --panel: #ffffff;
+        --text: #0f172a;
+        --muted: #64748b;
+        --line: #e2e8f0;
+        --primary: #4f46e5;
+        --primary-2: #3b82f6;
+        --danger: #ef4444;
+        --success: #22c55e;
+        --warning: #f59e0b;
+      }
+      [data-theme="dark"] {
+        --bg: #0b1220;
+        --panel: #111b2e;
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --line: #243247;
+        --primary: #818cf8;
+        --primary-2: #60a5fa;
+      }
+      * { box-sizing: border-box; }
+      html, body {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+      }
+      body {
+        margin: 0;
+        font-family: "Inter", "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        transition: background 0.2s ease, color 0.2s ease;
+      }
+      .container {
+        max-width: 100% !important;
+      }
+      .app-layout {
+        min-height: 100vh;
+        display: flex;
+        width: 100%;
+        max-width: 100%;
+      }
+      .sidebar {
+        width: 250px;
+        min-width: 250px;
+        flex-shrink: 0;
+        background: var(--panel);
+        border-right: 1px solid var(--line);
+        padding: 20px 14px;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        font-size: 24px;
+        margin: 8px 8px 20px;
+      }
+      .brand i { color: var(--primary-2); }
+      .menu-link {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        text-decoration: none;
+        color: #334155;
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-bottom: 6px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      [data-theme="dark"] .menu-link { color: #cbd5e1; }
+      [data-theme="dark"] .menu-link:hover { background: #1f2a44; color: #c7d2fe; }
+      .menu-link:hover { background: #eef2ff; color: var(--primary); }
+      .menu-link.active {
+        background: linear-gradient(90deg, #4f46e5, #3b82f6);
+        color: #fff;
+      }
+      .menu-link .left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .badge-dot {
+        font-size: 11px;
+        color: #fff;
+        background: #ef4444;
+        border-radius: 999px;
+        padding: 2px 7px;
+      }
+      .upgrade-card {
+        margin-top: 16px;
+        background: linear-gradient(180deg, #fff7ed, #fee2e2);
+        border: 1px solid #fed7aa;
+        border-radius: 12px;
+        padding: 12px;
+      }
+      .upgrade-card h6 { margin: 0 0 6px; font-size: 14px; }
+      .upgrade-card p { margin: 0 0 10px; color: var(--muted); font-size: 12px; }
+      .project-card {
+        margin-top: 12px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 12px;
+        background: color-mix(in srgb, var(--panel) 92%, #eef2ff 8%);
+      }
+      .project-card h6 {
+        margin: 0 0 8px;
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .project-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 7px;
+      }
+      .project-item strong {
+        color: var(--text);
+        font-size: 12px;
+      }
+      .health-row {
+        margin: 8px 0;
+      }
+      .health-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        color: var(--muted);
+        margin-bottom: 4px;
+      }
+      .health-bar {
+        width: 100%;
+        height: 6px;
+        border-radius: 999px;
+        background: #e2e8f0;
+        overflow: hidden;
+      }
+      .health-fill {
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #22c55e, #16a34a);
+      }
+      [data-theme="dark"] .health-bar {
+        background: #273449;
+      }
+      [data-theme="dark"] .project-card {
+        background: color-mix(in srgb, var(--panel) 94%, #0f172a 6%);
+      }
+      .upgrade-btn {
+        display: block;
+        width: 100%;
+        text-align: center;
+        text-decoration: none;
+        color: #fff;
+        padding: 8px 10px;
+        border-radius: 8px;
+        background: linear-gradient(90deg, #7c3aed, #4f46e5);
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .sidebar-user {
+        margin-top: 18px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        background: linear-gradient(135deg, #7c3aed, #3b82f6);
+        font-weight: 700;
+      }
+      .main {
+        flex: 1;
+        width: 100%;
+        min-width: 0;
+        padding: 18px 18px 28px;
+      }
+      .content-wrapper {
+        width: 100%;
+        max-width: 100%;
+      }
+      .topbar {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 14px;
+      }
+      .topbar h3 { margin: 0; font-size: 26px; }
+      .subtitle { color: var(--muted); margin-top: 4px; font-size: 13px; }
+      .search-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .search {
+        border: 1px solid var(--line);
+        background: color-mix(in srgb, var(--panel) 85%, #f8fafc 15%);
+        border-radius: 9px;
+        padding: 8px 12px;
+        min-width: 260px;
+        font-size: 13px;
+        color: var(--text);
+      }
+      .icon-btn {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        border-radius: 9px;
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+        color: #475569;
+      }
+      [data-theme="dark"] .icon-btn { color: #cbd5e1; }
+      .layout-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+        width: 100%;
+        max-width: 100%;
+      }
+      .layout-grid > section,
+      .layout-grid > aside {
+        min-width: 0;
+      }
+      .alert-banner {
+        background: linear-gradient(90deg, #fee2e2, #fff1f2);
+        border: 1px solid #fecaca;
+        border-radius: 12px;
+        padding: 10px 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+      [data-theme="dark"] .alert-banner {
+        background: linear-gradient(90deg, #3a1721, #2a1624);
+        border-color: #7f1d1d;
+      }
+      [data-theme="dark"] .alert-banner.safe {
+        background: linear-gradient(90deg, #10291d, #0f2e1f);
+        border-color: #166534;
+      }
+      .alert-banner.safe {
+        border-color: #bbf7d0;
+        background: linear-gradient(90deg, #ecfdf5, #f0fdf4);
+      }
+      .alert-btn {
+        border: none;
+        color: #fff;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 13px;
+        padding: 8px 12px;
+        background: linear-gradient(90deg, #ef4444, #f97316);
+      }
+      .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-bottom: 12px;
+        width: 100%;
+      }
+      .kpi-card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 12px;
+      }
+      .kpi-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: var(--muted);
+        font-size: 11px;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+      .kpi-value { font-size: 34px; line-height: 1.1; font-weight: 800; margin: 8px 0 5px; }
+      .kpi-change { font-size: 12px; }
+      .up { color: var(--success); }
+      .down { color: var(--danger); }
+      .chart-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-bottom: 12px;
+        width: 100%;
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 12px;
+      }
+      [data-theme="dark"] .chip-red { background: #3b1218; color: #fca5a5; }
+      [data-theme="dark"] .chip-green { background: #0f2e1f; color: #86efac; }
+      [data-theme="dark"] .chip-yellow { background: #3d2b0c; color: #fcd34d; }
+      [data-theme="dark"] .upgrade-card {
+        background: linear-gradient(180deg, #2b203c, #1e1b4b);
+        border-color: #4c1d95;
+      }
+      [data-theme="dark"] .upgrade-card p { color: #cbd5e1; }
+      .panel h5 {
+        margin: 0 0 10px;
+        font-size: 14px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .panel .muted-link {
+        text-decoration: none;
+        font-size: 12px;
+        color: #2563eb;
+      }
+      .chart-box { height: 300px; position: relative; width: 100%; max-width: 100%; }
+      .chart-box canvas {
+        width: 100% !important;
+        height: 300px !important;
+        max-width: 100%;
+        display: block;
+      }
+      .table-wrap { overflow-x: auto; width: 100%; max-width: 100%; }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+      th, td {
+        border-bottom: 1px solid var(--line);
+        padding: 9px 8px;
+        text-align: left;
+        white-space: nowrap;
+      }
+      th {
+        font-size: 11px;
+        color: var(--muted);
+        text-transform: uppercase;
+      }
+      .chip {
+        border-radius: 999px;
+        padding: 3px 9px;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .chip-red { background: #fee2e2; color: #b91c1c; }
+      .chip-green { background: #dcfce7; color: #166534; }
+      .chip-yellow { background: #fef3c7; color: #92400e; }
+      .right-stack {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .right-stack .panel {
+        height: 100%;
+      }
+      .side-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .side-list li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0;
+        border-bottom: 1px dashed #e2e8f0;
+        font-size: 13px;
+      }
+      .quick-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        width: 100%;
+      }
+      .quick-card {
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 12px;
+        padding: 12px;
+      }
+      .quick-card h6 { margin: 8px 0 4px; font-size: 14px; }
+      .quick-card p { margin: 0 0 10px; color: var(--muted); font-size: 12px; min-height: 32px; }
+      .quick-card a {
+        text-decoration: none;
+        display: block;
+        text-align: center;
+        border-radius: 8px;
+        padding: 7px 8px;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .b1 { background: linear-gradient(90deg, #2563eb, #3b82f6); }
+      .b2 { background: linear-gradient(90deg, #16a34a, #22c55e); }
+      .b3 { background: linear-gradient(90deg, #d97706, #f59e0b); }
+      .b4 { background: linear-gradient(90deg, #7c3aed, #a855f7); }
+      .forms-grid {
+        margin-top: 14px;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        width: 100%;
+      }
+      .form-control, .form-select {
+        font-size: 13px;
+      }
+      .footer {
+        margin-top: 16px;
+        text-align: center;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      @media (max-width: 1280px) {
+        .right-stack { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+      @media (max-width: 1100px) {
+        .app-layout { display: block; }
+        .sidebar { position: relative; height: auto; }
+        .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+        .quick-grid { grid-template-columns: repeat(2, 1fr); }
+      }
+      @media (max-width: 720px) {
+        .search { min-width: 160px; }
+        .kpi-grid, .chart-grid, .forms-grid, .quick-grid { grid-template-columns: 1fr; }
+        .right-stack { grid-template-columns: 1fr; }
+        .topbar { flex-direction: column; align-items: flex-start; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-layout">
+      <aside class="sidebar">
+        <div class="brand"><i class="fas fa-shield-halved"></i> FraudSense AI</div>
+        <a class="menu-link active" href="/dashboard"><span class="left"><i class="fas fa-gauge-high"></i> Dashboard</span><i class="fas fa-angle-right"></i></a>
+        <a class="menu-link" href="#fraud-section"><span class="left"><i class="fas fa-lock"></i> Fraud Detection</span></a>
+        <a class="menu-link" href="#loan-section"><span class="left"><i class="fas fa-credit-card"></i> Loan Prediction</span></a>
+        <a class="menu-link" href="#risk-section"><span class="left"><i class="fas fa-triangle-exclamation"></i> Risk Assessment</span></a>
+        <a class="menu-link" href="#anomaly-section"><span class="left"><i class="fas fa-bolt"></i> Anomaly Detection</span></a>
+        <a class="menu-link" href="#alerts-section"><span class="left"><i class="fas fa-bell"></i> Alerts</span><span class="badge-dot">12</span></a>
+        <a class="menu-link" href="#reports-section"><span class="left"><i class="fas fa-chart-column"></i> Reports</span></a>
+        <a class="menu-link" href="/history"><span class="left"><i class="fas fa-clock-rotate-left"></i> Transactions</span></a>
+
+        <div class="project-card">
+          <h6><i class="fas fa-diagram-project"></i> Project Snapshot</h6>
+          <div class="project-item"><span>Active Models</span><strong>4</strong></div>
+          <div class="project-item"><span>Predictions Today</span><strong>{{ stats.total }}</strong></div>
+          <div class="project-item"><span>Fraud Alerts</span><strong style="color:#ef4444">{{ fraud_total }}</strong></div>
+          <div class="project-item"><span>Safe Cases</span><strong style="color:#16a34a">{{ safe_total }}</strong></div>
+          <div class="health-row">
+            <div class="health-label"><span>System Health</span><span>98%</span></div>
+            <div class="health-bar"><div class="health-fill" style="width:98%"></div></div>
+          </div>
+          <a class="upgrade-btn" href="/download-report" style="margin-top:8px">
+            <i class="fas fa-file-arrow-down"></i> Export Report
+          </a>
+        </div>
+
+        <div class="upgrade-card">
+          <h6><i class="fas fa-crown"></i> Upgrade to Pro</h6>
+          <p>Unlock advanced analytics and AI insights.</p>
+          <a class="upgrade-btn" href="#reports-section">Upgrade Now</a>
+        </div>
+
+        <div class="sidebar-user">
+          <div class="avatar">{{ (user[:1] if user else "A") | upper }}</div>
+          <div>
+            <div style="font-size: 13px; font-weight: 700">{{ user }}</div>
+            <div style="font-size: 11px; color: #64748b">{{ role }}</div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="content-wrapper">
+        <div class="topbar">
+          <div>
+            <h3>Good Morning, AYUSH GAUTAM! <span style="font-size: 20px">👋</span></h3>
+            <div class="subtitle">Here's what's happening with your financial protection system today.</div>
+          </div>
+          <div class="search-wrap">
+            <input class="search" type="text" placeholder="Search anything..." />
+            <button class="icon-btn"><i class="fas fa-bell"></i></button>
+            <button class="icon-btn" id="themeToggle" title="Toggle Theme"><i class="fas fa-moon" id="themeIcon"></i></button>
+            <form method="POST" action="/logout" style="margin: 0">
+              <button class="icon-btn" title="Logout" type="submit"><i class="fas fa-right-from-bracket"></i></button>
+            </form>
+          </div>
+        </div>
+
+        <div class="layout-grid">
+          <section>
+            <div class="alert-banner {% if fraud_total == 0 %}safe{% endif %}">
+              <div>
+                <div style="font-size: 14px; font-weight: 700">
+                  <i class="fas {% if fraud_total > 0 %}fa-shield-virus{% else %}fa-circle-check{% endif %}"></i>
+                  {% if fraud_total > 0 %}High Alert{% else %}System Safe{% endif %}:
+                  {{ banner_message }}
+                </div>
+                <div style="font-size: 12px; color: #64748b">This is {{ fraud_change }}% {% if fraud_change >= 0 %}higher{% else %}lower{% endif %} than previous period.</div>
+              </div>
+              <a href="#alerts-section" class="alert-btn">View Alerts <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <div class="kpi-grid">
+              <div class="kpi-card">
+                <div class="kpi-head">Fraud Alerts (7D) <i class="fas fa-circle-exclamation" style="color: var(--danger)"></i></div>
+                <div class="kpi-value">{{ fraud_total }}</div>
+                <div class="kpi-change down"><i class="fas fa-arrow-up"></i> {{ fraud_change }}% from last 7 days</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-head">Safe Transactions (7D) <i class="fas fa-shield-heart" style="color: var(--success)"></i></div>
+                <div class="kpi-value">{{ safe_total }}</div>
+                <div class="kpi-change up"><i class="fas fa-arrow-up"></i> {{ safe_change }}% from last 7 days</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-head">Risk Score <i class="fas fa-chart-line" style="color: var(--warning)"></i></div>
+                <div class="kpi-value">{{ (fraud_rate | round(1) | string) if fraud_rate else "0" }}%</div>
+                <div class="kpi-change {% if fraud_rate > 50 %}down{% else %}up{% endif %}">
+                  <i class="fas fa-circle"></i> {% if fraud_rate > 50 %}High Risk{% else %}Manageable Risk{% endif %}
+                </div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-head">Total Transactions (7D) <i class="fas fa-database" style="color: var(--primary)"></i></div>
+                <div class="kpi-value">{{ stats.total }}</div>
+                <div class="kpi-change up"><i class="fas fa-arrow-up"></i> {{ ((stats.total / 7) | round(1) | string) if stats.total else "0" }} per day</div>
+              </div>
+            </div>
+
+            <div class="chart-grid">
+              <div class="panel">
+                <h5><span><i class="fas fa-chart-line"></i> Fraud Trend (Last 7 Days)</span></h5>
+                <div class="chart-box"><canvas id="fraudTrendChart"></canvas></div>
+              </div>
+              <div class="panel">
+                <h5><span><i class="fas fa-location-dot"></i> Location Based Fraud</span><a class="muted-link" href="/history">View All</a></h5>
+                <div class="chart-box"><canvas id="locationChart"></canvas></div>
+              </div>
+              <div class="panel">
+                <h5><span><i class="fas fa-chart-pie"></i> Risk Distribution</span></h5>
+                <div class="chart-box"><canvas id="riskDistributionChart"></canvas></div>
+              </div>
+              <div class="panel">
+                <h5><span><i class="fas fa-bullseye"></i> Transaction Patterns</span></h5>
+                <div class="chart-box"><canvas id="transactionPatternsChart"></canvas></div>
+              </div>
+            </div>
+
+
+            <div class="panel" style="margin-top: 10px" id="reports-section">
+              <h5><span><i class="fas fa-bolt"></i> Quick Actions</span></h5>
+              <div class="quick-grid">
+                <div class="quick-card">
+                  <i class="fas fa-shield-virus fa-lg" style="color:#2563eb"></i>
+                  <h6>Fraud Detection</h6>
+                  <p>Analyze transaction for potential fraud patterns.</p>
+                  <a class="b1" href="#fraud-section">Start Detection</a>
+                </div>
+                <div class="quick-card">
+                  <i class="fas fa-file-invoice-dollar fa-lg" style="color:#16a34a"></i>
+                  <h6>Loan Prediction</h6>
+                  <p>Predict default risk likelihood for applicants.</p>
+                  <a class="b2" href="#loan-section">Predict Loan</a>
+                </div>
+                <div class="quick-card">
+                  <i class="fas fa-chart-pie fa-lg" style="color:#f59e0b"></i>
+                  <h6>Risk Assessment</h6>
+                  <p>Assess risk level for customers or transactions.</p>
+                  <a class="b3" href="#risk-section">Assess Risk</a>
+                </div>
+                <div class="quick-card">
+                  <i class="fas fa-wave-square fa-lg" style="color:#7c3aed"></i>
+                  <h6>Anomaly Detection</h6>
+                  <p>Detect unusual patterns using ML algorithms.</p>
+                  <a class="b4" href="#anomaly-section">Detect Anomaly</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="forms-grid">
+              <div class="panel" id="fraud-section">
+                <h5><span><i class="fas fa-lock"></i> Fraud Detection</span></h5>
+                <form method="POST" action="/predict">
+                  <div class="mb-2"><input class="form-control" type="number" step="0.01" required name="amount" placeholder="Amount (Rs)" /></div>
+                  <div class="mb-2"><input class="form-control" type="number" min="0" max="23" required name="time" placeholder="Time (0-23)" /></div>
+                  <div class="mb-2"><select class="form-select" name="device"><option value="mobile">Mobile</option><option value="web">Web</option><option value="atm">ATM</option></select></div>
+                  <div class="mb-2"><input class="form-control" type="text" required name="location" placeholder="Location" /></div>
+                  <div class="mb-2"><input class="form-control" type="text" required name="trans_type" placeholder="Transaction Type" /></div>
+                  <button class="btn btn-primary w-100" type="submit"><i class="fas fa-check"></i> Check Transaction</button>
+                </form>
+              </div>
+              <div class="panel" id="loan-section">
+                <h5><span><i class="fas fa-credit-card"></i> Loan Prediction</span></h5>
+                <form method="POST" action="/loan">
+                  <div class="mb-2"><input class="form-control" type="number" required name="age" placeholder="Age" /></div>
+                  <div class="mb-2"><input class="form-control" type="number" step="0.01" required name="income" placeholder="Annual Income (Rs)" /></div>
+                  <div class="mb-2"><input class="form-control" type="number" step="0.01" required name="loan" placeholder="Loan Amount (Rs)" /></div>
+                  <div class="mb-2"><input class="form-control" type="number" required name="credit" placeholder="Credit Score" /></div>
+                  <div class="mb-2"><input class="form-control" type="number" step="0.1" required name="employment" placeholder="Employment Years" /></div>
+                  <button class="btn btn-success w-100" type="submit"><i class="fas fa-calculator"></i> Evaluate Loan</button>
+                </form>
+              </div>
+              <div class="panel" id="risk-section">
+                <h5><span><i class="fas fa-triangle-exclamation"></i> Risk Assessment</span></h5>
+                <form method="POST" action="/risk">
+                  <div class="mb-2"><input class="form-control" type="number" required name="age" placeholder="Age" /></div>
+                  <div class="mb-2"><input class="form-control" type="number" step="0.01" required name="income" placeholder="Annual Income (Rs)" /></div>
+                  <div class="mb-2"><input class="form-control" type="number" step="0.01" required name="loan" placeholder="Loan Amount (Rs)" /></div>
+                  <div class="mb-2"><input class="form-control" type="number" required name="credit" placeholder="Credit Score" /></div>
+                  <button class="btn btn-warning w-100" type="submit">Assess Risk</button>
+                </form>
+              </div>
+              <div class="panel" id="anomaly-section">
+                <h5><span><i class="fas fa-bolt"></i> Anomaly Detection</span></h5>
+                <form method="POST" action="/anomaly">
+                  <div class="mb-2"><input class="form-control" type="number" step="0.01" required name="amount" placeholder="Amount (Rs)" /></div>
+                  <div class="mb-2"><input class="form-control" type="number" min="0" max="23" required name="time" placeholder="Time (0-23)" /></div>
+                  <div class="mb-2"><input class="form-control" type="text" required name="location" placeholder="Location" /></div>
+                  <div class="mb-2"><select class="form-select" name="device"><option value="mobile">Mobile</option><option value="web">Web</option><option value="atm">ATM</option></select></div>
+                  <button class="btn btn-dark w-100" type="submit">Detect Anomaly</button>
+                </form>
+              </div>
+            </div>
+
+            <div class="panel" style="margin-top: 10px">
+              <h5><span><i class="fas fa-clock-rotate-left"></i> Recent Transactions</span><a class="muted-link" href="/history">View All</a></h5>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>ID</th><th>Type</th><th>Amount</th><th>Location</th><th>Device</th><th>Result</th><th>Confidence</th><th>Time</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% if recent_transactions %} {% for trans in recent_transactions %}
+                    <tr>
+                      <td>#{{ trans.id }}</td>
+                      <td>
+                        <span class="chip {% if 'fraud' in trans.trans_type.lower() or 'anomaly' in trans.trans_type.lower() %}chip-red{% elif 'loan' in trans.trans_type.lower() or 'risk' in trans.trans_type.lower() %}chip-yellow{% else %}chip-green{% endif %}">
+                          {{ trans.trans_type | upper }}
+                        </span>
+                      </td>
+                      <td>₹{{ trans.amount | round(2) }}</td>
+                      <td>{{ trans.location }}</td>
+                      <td>{{ trans.device }}</td>
+                      <td>
+                        {% if 'Fraud' in trans.result or 'Rejected' in trans.result or 'DEFAULT' in trans.result or 'High' in trans.result %}
+                        <span class="chip chip-red">{{ trans.result }}</span>
+                        {% elif 'Safe' in trans.result or 'Approved' in trans.result or 'Low' in trans.result or 'Normal' in trans.result %}
+                        <span class="chip chip-green">{{ trans.result }}</span>
+                        {% else %}
+                        <span class="chip chip-yellow">{{ trans.result }}</span>
+                        {% endif %}
+                      </td>
+                      <td>{{ trans.confidence }}%</td>
+                      <td>{% if trans.date %}{% if trans.date is string %}{{ trans.date }}{% else %}{{ trans.date.strftime('%b %d, %Y %H:%M') }}{% endif %}{% else %}N/A{% endif %}</td>
+                    </tr>
+                    {% endfor %} {% else %}
+                    <tr><td colspan="8" style="text-align:center;color:#64748b;padding:18px;">No transactions yet.</td></tr>
+                    {% endif %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel" style="margin-top: 10px">
+              <h5><span><i class="fas fa-table-list"></i> Complete History (Latest 3)</span><a class="muted-link" href="/history">Open Full History</a></h5>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>ID</th><th>Type</th><th>Amount</th><th>Location</th><th>Device</th><th>Result</th><th>Confidence</th><th>Time</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% if history_transactions %} {% for trans in history_transactions %}
+                    <tr>
+                      <td>#{{ trans.id }}</td>
+                      <td>{{ trans.trans_type | upper }}</td>
+                      <td>₹{{ trans.amount | round(2) }}</td>
+                      <td>{{ trans.location }}</td>
+                      <td>{{ trans.device }}</td>
+                      <td>{{ trans.result }}</td>
+                      <td>{{ trans.confidence }}%</td>
+                      <td>{{ trans.date }}</td>
+                    </tr>
+                    {% endfor %} {% else %}
+                    <tr><td colspan="8" style="text-align:center;color:#64748b;padding:18px;">No history available yet.</td></tr>
+                    {% endif %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="footer">&copy; 2024 FraudSense AI - Advanced Financial Protection System</div>
+          </section>
+
+          <aside class="right-stack" id="alerts-section">
+            <div class="panel">
+              <h5><span><i class="fas fa-heart-pulse"></i> System Status</span></h5>
+              <div style="font-size: 13px; color: #16a34a; font-weight: 700"><i class="fas fa-circle-check"></i> All systems operational</div>
+              <div style="font-size: 12px; color: #64748b">Last updated: 2 sec ago</div>
+            </div>
+            <div class="panel">
+              <h5><span><i class="fas fa-location-pin"></i> Top Risk Locations</span></h5>
+              <ul class="side-list">
+                {% for idx in range(location_labels|length) %}
+                <li><span>{{ location_labels[idx] }}</span><strong style="color:#ef4444">{{ location_values[idx] }}</strong></li>
+                {% endfor %}
+              </ul>
+            </div>
+            <div class="panel">
+              <h5><span><i class="fas fa-gauge"></i> Fraud Rate</span></h5>
+              <div style="font-size: 42px; font-weight: 800; color: #2563eb; line-height: 1">{{ (fraud_rate | round(1) | string) if fraud_rate else "0" }}%</div>
+              <div style="font-size: 13px; color: #ef4444; font-weight: 700">{% if fraud_rate > 50 %}High Risk{% else %}Moderate Risk{% endif %}</div>
+            </div>
+            <div class="panel">
+              <h5><span><i class="fas fa-wave-square"></i> Activity Feed</span><a class="muted-link" href="/history">View All</a></h5>
+              <ul class="side-list">
+                <li><span>New fraud alert #{{ recent_transactions[0].id if recent_transactions else "----" }}</span><small>2 sec ago</small></li>
+                <li><span>Risk score updated</span><small>5 sec ago</small></li>
+                <li><span>New user registered</span><small>1 min ago</small></li>
+                <li><span>System backup completed</span><small>2 min ago</small></li>
+              </ul>
+            </div>
+          </aside>
+        </div>
+        </div>
+      </main>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if messages %}
+    <div style="position: fixed; top: 18px; right: 18px; z-index: 999; max-width: 380px">
+      {% for category, message in messages %}
+      <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' if category == 'success' else 'warning' }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %} {% endwith %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      const root = document.documentElement;
+      const savedTheme = localStorage.getItem("fraudsense-theme") || "light";
+      root.setAttribute("data-theme", savedTheme);
+
+      const themeToggleBtn = document.getElementById("themeToggle");
+      const themeIcon = document.getElementById("themeIcon");
+      const isDarkTheme = savedTheme === "dark";
+      if (themeIcon) {
+        themeIcon.className = isDarkTheme ? "fas fa-sun" : "fas fa-moon";
+      }
+
+      const chartPalette = isDarkTheme
+        ? {
+            legend: "#cbd5e1",
+            axis: "#94a3b8",
+            grid: "rgba(148, 163, 184, 0.2)"
+          }
+        : {
+            legend: "#475569",
+            axis: "#64748b",
+            grid: "rgba(148, 163, 184, 0.22)"
+          };
+
+      if (themeToggleBtn) {
+        themeToggleBtn.addEventListener("click", () => {
+          const current = root.getAttribute("data-theme") || "light";
+          const next = current === "dark" ? "light" : "dark";
+          localStorage.setItem("fraudsense-theme", next);
+          location.reload();
+        });
+      }
+
+      const chartDefaults = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            labels: { color: chartPalette.legend, boxWidth: 12, usePointStyle: true }
+          }
+        },
+        scales: {
+          x: { ticks: { color: chartPalette.axis }, grid: { color: chartPalette.grid } },
+          y: { ticks: { color: chartPalette.axis, precision: 0 }, grid: { color: chartPalette.grid }, beginAtZero: true }
+        }
+      };
+
+      const fraudTrendCanvas = document.getElementById("fraudTrendChart");
+      if (fraudTrendCanvas && window.Chart) {
+        new Chart(fraudTrendCanvas.getContext("2d"), {
+          type: "line",
+          data: {
+            labels: {{ line_labels | tojson }},
+            datasets: [
+              { label: "Fraud Cases", data: {{ line_fraud | tojson }}, borderColor: "#ef4444", backgroundColor: "rgba(239,68,68,0.15)", fill: true, tension: 0.35 },
+              { label: "Legit Cases", data: {{ line_legit | tojson }}, borderColor: "#22c55e", backgroundColor: "rgba(34,197,94,0.15)", fill: true, tension: 0.35 }
+            ]
+          },
+          options: chartDefaults
+        });
+      }
+
+      const locationCanvas = document.getElementById("locationChart");
+      if (locationCanvas && window.Chart) {
+        new Chart(locationCanvas.getContext("2d"), {
+          type: "bar",
+          data: {
+            labels: {{ location_labels | tojson }},
+            datasets: [{ label: "Fraud Cases", data: {{ location_values | tojson }}, backgroundColor: "rgba(239,68,68,0.65)", borderRadius: 8 }]
+          },
+          options: chartDefaults
+        });
+      }
+
+      const riskCanvas = document.getElementById("riskDistributionChart");
+      if (riskCanvas && window.Chart) {
+        new Chart(riskCanvas.getContext("2d"), {
+          type: "doughnut",
+          data: {
+            labels: ["High Risk", "Medium Risk", "Low Risk"],
+            datasets: [{ data: [Math.max({{ fraud_total }}, 1), Math.max(Math.round({{ stats.total or 0 }} * 0.25), 1), Math.max({{ safe_total }}, 1)], backgroundColor: ["#ef4444", "#f59e0b", "#22c55e"], borderWidth: 0 }]
+          },
+          options: { ...chartDefaults, scales: undefined }
+        });
+      }
+
+      const radarCanvas = document.getElementById("transactionPatternsChart");
+      if (radarCanvas && window.Chart) {
+        new Chart(radarCanvas.getContext("2d"), {
+          type: "radar",
+          data: {
+            labels: ["Night", "Morning", "Afternoon", "Evening", "Late Night"],
+            datasets: [
+              { label: "Normal", data: [40, 70, 55, 60, 35], borderColor: "#22c55e", backgroundColor: "rgba(34,197,94,0.18)" },
+              { label: "Fraud", data: [75, 30, 35, 45, 70], borderColor: "#ef4444", backgroundColor: "rgba(239,68,68,0.18)" }
+            ]
+          },
+          options: { ...chartDefaults, scales: { r: { angleLines: { color: chartPalette.grid }, grid: { color: chartPalette.grid }, pointLabels: { color: chartPalette.axis }, ticks: { color: chartPalette.axis, backdropColor: "transparent" } } } }
+        });
+      }
+
+      document.querySelectorAll(".alert-dismissible").forEach((alert) => {
+        setTimeout(() => {
+          const b = new bootstrap.Alert(alert);
+          b.close();
+        }, 5000);
+      });
+    </script>
+  </body>
+</html>
