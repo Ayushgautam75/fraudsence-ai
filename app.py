@@ -10,7 +10,6 @@ import json
 import csv
 import io
 import traceback
-
 from config import (
     BASE_DIR, MODEL_DIR, DATABASE_URI, SECRET_KEY, DEMO_USERS, 
     FRAUD_THRESHOLDS, LOAN_THRESHOLDS, RISK_THRESHOLDS
